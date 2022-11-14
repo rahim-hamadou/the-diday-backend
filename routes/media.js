@@ -3,12 +3,13 @@ var router = express.Router();
 
 const cloudinary = require('cloudinary').v2;
 require('../models/connection');
-const Media = require('../models/media');
-
 const uniqid = require('uniqid');
 const fs = require('fs');
+const User = require('../models/users')
 
-router.post('/upload', async (req, res) => {
+router.post('/upload/:tokenUser', async (req, res) => {
+  console.log(req.params);
+  console.log(req.body);
   try {
     const videoPath = `./tmp/${uniqid()}.mp4`;
     console.log(videoPath);
@@ -18,6 +19,19 @@ router.post('/upload', async (req, res) => {
      const resultCloudinary = await cloudinary.uploader.upload(videoPath, {
       resource_type: "auto",
     });
+    // modifier le sous document média avec l'url de resultCloudinary.secure_url
+    //console.log(resultCloudinary.secure_url);
+    User.updateOne({ token: req.params.tokenUser }, { media: { url: resultCloudinary.secure_url } } ).then(() => {
+      User.findOne({ token: req.params.tokenUser }).then((data) => {
+        if (data) {
+            console.log("change  media ok");
+          //res.json({ result: true, media: data.media });
+        } else {
+          res.json({ result: false, error: "Error Wrong task" });
+        }
+      });
+    });
+
      res.json({ result: true, url: resultCloudinary.secure_url });
    } else {
      res.json({ result: false, error: resultMove });
