@@ -128,7 +128,7 @@ router.post("/message/:channel", async (req, res) => {
 
 // test backend
 router.get("/test", function (req, res) {
-	res.json({ result: true, error: "backend off" });
+	res.json({ result: true, error: "backend on" });
 });
 
 module.exports = router;
